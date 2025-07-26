@@ -140,23 +140,100 @@ Con los datos fluyendo, construiremos las páginas que verán los visitantes.
 
 ### **Fase 4: Creación del Sistema de Gestión (Backend)**
 
-Implementaremos la sección de administración para añadir nuevo contenido.
+**Objetivo Principal:** Permitir la creación y gestión de nuevo contenido (entradas de blog y proyectos) a través de una interfaz web segura, y automatizar la actualización del portafolio una vez que se añade nuevo contenido.
 
-1.  **Crear Formularios de Administración:**
-    *   Crea las páginas `src/pages/admin/nuevo-post.astro` y `src/pages/admin/nuevo-repo.astro`.
-    *   Cada página contendrá un formulario HTML para enviar los datos del nuevo contenido.
+Esta fase se centrará en la creación de una sección de administración básica pero funcional, accesible solo para ti.
 
-2.  **Crear API Endpoints (Serverless Functions):**
-    *   Crea el archivo `src/pages/api/posts/create.ts`.
-    *   Este será el endpoint que reciba los datos del formulario de nuevo post. Implementará la lógica para:
-        a.  **Validar la autenticación** (provisionalmente se puede omitir para pruebas locales).
-        b.  Recibir los datos del `request`.
-        c.  Insertar los datos en la tabla `posts` de PostgreSQL.
-        d.  Devolver una respuesta de éxito o error.
-    *   Repite el proceso para los repositorios en `src/pages/api/repos/create.ts`.
+---
 
-3.  **Añadir Lógica en el Frontend:**
-    *   En los archivos `.astro` de los formularios, añade un `<script>` que intercepte el `submit` del formulario, envíe los datos al API endpoint correspondiente usando `fetch`, y muestre un mensaje al usuario.
+#### **Componentes Clave de esta Fase:**
+
+1.  **Autenticación (Login/Logout):** Un sistema simple para proteger la sección de administración.
+2.  **Panel de Administración (Dashboard):** Una página central para navegar por las opciones de gestión de contenido.
+3.  **Formularios de Creación de Contenido:** Interfaces para añadir nuevas entradas de blog y nuevos proyectos.
+4.  **API Endpoints (Serverless Functions):** Funciones que recibirán los datos de los formularios y los guardarán en la base de datos.
+5.  **Integración con Vercel Deploy Hook:** Para que el sitio se reconstruya automáticamente al añadir nuevo contenido.
+
+---
+
+#### **Plan de Implementación Detallado (Paso a Paso):**
+
+**Paso 1: Configuración de la Autenticación Básica**
+
+*   **Propósito:** Asegurar que solo tú puedas acceder a la sección de administración. Utilizaremos un sistema de usuario/contraseña simple almacenado en variables de entorno para mayor seguridad y facilidad de uso en un portafolio personal.
+*   **Archivos a Crear/Modificar:**
+    *   `portafolio2.0/.env`: Añadiremos `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
+    *   `portafolio2.0/src/lib/auth.ts`:
+        *   Contendrá funciones para verificar credenciales.
+        *   Funciones para manejar cookies de sesión (establecer y eliminar). Usaremos `js-cookie` para simplificar la gestión de cookies en el frontend.
+    *   `portafolio2.0/src/pages/admin/login.astro`:
+        *   Página con un formulario de inicio de sesión (usuario y contraseña).
+        *   El formulario enviará los datos a un API endpoint.
+    *   `portafolio2.2/src/pages/api/login.ts`:
+        *   **Serverless Function** que recibirá las credenciales del formulario.
+        *   Verificará las credenciales contra las variables de entorno.
+        *   Si son correctas, establecerá una cookie de sesión segura en el navegador del usuario.
+        *   Redirigirá al usuario al panel de administración.
+    *   `portafolio2.0/src/pages/api/logout.ts`:
+        *   **Serverless Function** que eliminará la cookie de sesión.
+        *   Redirigirá al usuario a la página de inicio de sesión.
+*   **Protección de Rutas:** En cada página de administración (`/admin/*`), en el frontmatter de Astro, verificaremos la existencia y validez de la cookie de sesión. Si no es válida, redirigiremos al usuario a la página de login.
+
+**Paso 2: Creación del Panel de Administración (Dashboard)**
+
+*   **Propósito:** Servir como la página principal de la sección de administración, con enlaces a las funcionalidades de creación de contenido.
+*   **Archivo a Crear:**
+    *   `portafolio2.0/src/pages/admin/index.astro`:
+        *   Contendrá el chequeo de autenticación.
+        *   Mostrará enlaces a "Crear Nueva Entrada de Blog" y "Crear Nuevo Proyecto".
+        *   Tendrá un botón para "Cerrar Sesión".
+
+**Paso 3: Creación de Formularios para Nuevo Contenido**
+
+*   **Propósito:** Proporcionar interfaces amigables para que puedas introducir los datos de tus nuevas entradas de blog y proyectos.
+*   **Archivos a Crear:**
+    *   `portafolio2.0/src/pages/admin/nuevo-post.astro`:
+        *   Formulario con campos para: `title`, `content` (textarea, posiblemente con soporte Markdown), `image_url`, `seo_description`.
+        *   El formulario enviará los datos a `src/pages/api/posts/create.ts`.
+    *   `portafolio2.0/src/pages/admin/nuevo-repo.astro`:
+        *   Formulario con campos para: `name`, `description`, `technologies`, `url`, `github_url`, `image_url`.
+        *   El formulario enviará los datos a `src/pages/api/repos/create.ts`.
+*   **Consideraciones:**
+    *   Ambos formularios tendrán un `<script>` en el cliente para manejar el envío del formulario (usando `fetch`) y mostrar mensajes de éxito/error.
+
+**Paso 4: Implementación de API Endpoints (Serverless Functions) para Guardar Contenido**
+
+*   **Propósito:** Recibir los datos de los formularios, validarlos y persistirlos en la base de datos PostgreSQL.
+*   **Archivos a Crear:**
+    *   `portafolio2.0/src/pages/api/posts/create.ts`:
+        *   Recibirá el `FormData` del formulario.
+        *   Realizará una validación básica de los datos (ej. campos obligatorios).
+        *   Insertará los datos en la tabla `blog_posts` de PostgreSQL.
+        *   **¡CRUCIAL!** Después de una inserción exitosa, activará el Vercel Deploy Hook (ver Paso 5).
+        *   Devolverá una respuesta JSON indicando éxito o error.
+    *   `portafolio2.0/src/pages/api/repos/create.ts`:
+        *   Similar a `create.ts` para posts, pero insertará en la tabla `repositories`.
+        *   También activará el Vercel Deploy Hook.
+
+**Paso 5: Integración con Vercel Deploy Hook para Reconstrucción Automática**
+
+*   **Propósito:** Asegurar que cada vez que añadas o modifiques contenido, tu sitio estático se reconstruya y se despliegue automáticamente con los nuevos datos.
+*   **Configuración en Vercel (Manual):**
+    *   Necesitarás ir al panel de control de Vercel para tu proyecto.
+    *   En la sección "Settings" -> "Git" -> "Deploy Hooks", crearás un nuevo "Deploy Hook".
+    *   Le darás un nombre (ej. `rebuild-on-content-change`) y seleccionarás la rama `main`.
+    *   Vercel te proporcionará una URL única para este hook.
+    *   Esta URL la guardarás como una variable de entorno secreta en Vercel, por ejemplo, `VERCEL_DEPLOY_HOOK_URL`.
+*   **Activación desde API Endpoints (Código):**
+    *   En `src/pages/api/posts/create.ts` y `src/pages/api/repos/create.ts`, después de que la inserción en la base de datos sea exitosa, se realizará una solicitud `fetch` a la `VERCEL_DEPLOY_HOOK_URL`. Esto le dirá a Vercel que inicie un nuevo proceso de construcción.
+
+---
+
+#### **Consideraciones de Seguridad:**
+
+*   **Variables de Entorno:** `ADMIN_USERNAME`, `ADMIN_PASSWORD` y `VERCEL_DEPLOY_HOOK_URL` se almacenarán como variables de entorno en Vercel, **nunca en el código fuente público**.
+*   **Autenticación Básica:** El sistema de autenticación propuesto es adecuado para un portafolio personal donde solo tú eres el administrador. Para aplicaciones con múltiples usuarios o requisitos de seguridad más estrictos, se necesitaría una solución de autenticación más robusta (ej. OAuth, JWTs, Firebase Authentication, etc.).
+*   **Validación de Entrada:** Es crucial validar todos los datos recibidos de los formularios en los API endpoints para prevenir inyecciones SQL u otros ataques.
 
 **Estado: Pendiente.**
 

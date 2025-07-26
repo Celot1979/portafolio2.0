@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "astro": "^5.12.3",
+    "js-cookie": "^3.0.5",
     "marked": "^16.1.1",
     "pg": "^8.16.3"
   }

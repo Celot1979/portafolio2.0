@@ -1,0 +1,101 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Admin Login">
+  <main class="login-container">
+    <h1>Iniciar Sesión (Admin)</h1>
+    <form id="login-form">
+      <div>
+        <label for="username">Usuario:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="login-message" class="message"></p>
+  </main>
+</Layout>
+
+<style>
+  .login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
+  .login-container h1 {
+    color: #00bcd4;
+    margin-bottom: 1.5rem;
+  }
+  .login-container div {
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+  .login-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  .login-container input[type="text"],
+  .login-container input[type="password"] {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #0d0d0d;
+    color: #fff;
+  }
+  .login-container button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  .login-container button:hover {
+    background-color: #218838;
+  }
+  .message {
+    margin-top: 1rem;
+    color: red;
+  }
+</style>
+
+<script>
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const messageElement = document.getElementById('login-message');
+
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      messageElement.textContent = 'Inicio de sesión exitoso. Redirigiendo...';
+      messageElement.style.color = 'green';
+      window.location.href = '/admin'; // Redirigir al panel de administración
+    } else {
+      messageElement.textContent = data.message || 'Error al iniciar sesión.';
+      messageElement.style.color = 'red';
+    }
+  });
+</script>

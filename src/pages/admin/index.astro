@@ -1,0 +1,85 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { isAuthenticated } from '../../lib/auth';
+
+export const prerender = false; // <--- AÑADIDO
+
+// Proteger esta ruta
+if (!isAuthenticated(Astro.cookies)) {
+  return Astro.redirect('/admin/login');
+}
+
+// Manejar el logout (el script de cliente ya lo hace)
+---
+
+<Layout title="Admin Dashboard">
+  <main class="admin-dashboard">
+    <h1>Panel de Administración</h1>
+    <p>Bienvenido, Daniel. Desde aquí puedes gestionar el contenido de tu portafolio.</p>
+
+    <div class="admin-links">
+      <a href="/admin/nuevo-post" class="admin-button">Crear Nueva Entrada de Blog</a>
+      <a href="/admin/nuevo-repo" class="admin-button">Crear Nuevo Proyecto</a>
+    </div>
+
+    <button id="logout-button" class="logout-button">Cerrar Sesión</button>
+  </main>
+</Layout>
+
+<style>
+  .admin-dashboard {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
+  .admin-dashboard h1 {
+    color: #00bcd4;
+    margin-bottom: 1.5rem;
+  }
+  .admin-dashboard p {
+    margin-bottom: 2rem;
+  }
+  .admin-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .admin-button {
+    display: block;
+    padding: 1rem;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  .admin-button:hover {
+    background-color: #0056b3;
+  }
+  .logout-button {
+    padding: 0.8rem 1.5rem;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .logout-button:hover {
+    background-color: #c82333;
+  }
+</style>
+
+<script>
+  document.getElementById('logout-button').addEventListener('click', async () => {
+    await fetch('/api/logout', {
+      method: 'POST',
+    });
+    window.location.href = '/admin/login';
+  });
+</script>
