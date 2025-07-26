@@ -138,104 +138,111 @@ Con los datos fluyendo, construiremos las páginas que verán los visitantes.
 
 ---
 
-### **Fase 4: Creación del Sistema de Gestión (Backend)**
+### **Fase 4: Creación del Sistema de Gestión (Backend) - Ampliada con CRUD**
 
-**Objetivo Principal:** Permitir la creación y gestión de nuevo contenido (entradas de blog y proyectos) a través de una interfaz web segura, y automatizar la actualización del portafolio una vez que se añade nuevo contenido.
+**Objetivo Principal:** Permitir la creación, visualización, modificación y eliminación de contenido (entradas de blog y proyectos) a través de una interfaz web segura, y automatizar la actualización del portafolio al gestionar el contenido.
 
 Esta fase se centrará en la creación de una sección de administración básica pero funcional, accesible solo para ti.
 
 ---
 
-#### **Componentes Clave de esta Fase:**
+#### **Componentes Clave de esta Fase (Actualizados):**
 
-1.  **Autenticación (Login/Logout):** Un sistema simple para proteger la sección de administración.
-2.  **Panel de Administración (Dashboard):** Una página central para navegar por las opciones de gestión de contenido.
+1.  **Autenticación (Login/Logout):** (Ya implementado)
+2.  **Panel de Administración (Dashboard):** (Ya implementado, pero se añadirán enlaces a las nuevas vistas de listado).
 3.  **Formularios de Creación de Contenido:** Interfaces para añadir nuevas entradas de blog y nuevos proyectos.
-4.  **API Endpoints (Serverless Functions):** Funciones que recibirán los datos de los formularios y los guardarán en la base de datos.
-5.  **Integración con Vercel Deploy Hook:** Para que el sitio se reconstruya automáticamente al añadir nuevo contenido.
+4.  **Vistas de Listado de Contenido:** Páginas para ver y gestionar (editar/borrar) todas las entradas de blog y proyectos existentes.
+5.  **Formularios de Edición de Contenido:** Interfaces para modificar entradas de blog y proyectos existentes.
+6.  **API Endpoints (Serverless Functions) para CRUD:** Funciones que manejarán las operaciones de Crear, Leer (para admin), Actualizar y Borrar en la base de datos.
+7.  **Integración con Vercel Deploy Hook:** Para que el sitio se reconstruya automáticamente al gestionar el contenido.
 
 ---
 
-#### **Plan de Implementación Detallado (Paso a Paso):**
+#### **Plan de Implementación Detallado (Paso a Paso - Actualizado):**
 
 **Paso 1: Configuración de la Autenticación Básica**
-
-*   **Propósito:** Asegurar que solo tú puedas acceder a la sección de administración. Utilizaremos un sistema de usuario/contraseña simple almacenado en variables de entorno para mayor seguridad y facilidad de uso en un portafolio personal.
-*   **Archivos a Crear/Modificar:**
-    *   `portafolio2.0/.env`: Añadiremos `ADMIN_USERNAME` y `ADMIN_PASSWORD`.
-    *   `portafolio2.0/src/lib/auth.ts`:
-        *   Contendrá funciones para verificar credenciales.
-        *   Funciones para manejar cookies de sesión (establecer y eliminar). Usaremos `js-cookie` para simplificar la gestión de cookies en el frontend.
-    *   `portafolio2.0/src/pages/admin/login.astro`:
-        *   Página con un formulario de inicio de sesión (usuario y contraseña).
-        *   El formulario enviará los datos a un API endpoint.
-    *   `portafolio2.2/src/pages/api/login.ts`:
-        *   **Serverless Function** que recibirá las credenciales del formulario.
-        *   Verificará las credenciales contra las variables de entorno.
-        *   Si son correctas, establecerá una cookie de sesión segura en el navegador del usuario.
-        *   Redirigirá al usuario al panel de administración.
-    *   `portafolio2.0/src/pages/api/logout.ts`:
-        *   **Serverless Function** que eliminará la cookie de sesión.
-        *   Redirigirá al usuario a la página de inicio de sesión.
-*   **Protección de Rutas:** En cada página de administración (`/admin/*`), en el frontmatter de Astro, verificaremos la existencia y validez de la cookie de sesión. Si no es válida, redirigiremos al usuario a la página de login.
+*   (Ya completado: `.env` con credenciales, `src/lib/auth.ts`, `src/pages/admin/login.astro`, `src/pages/api/login.ts`, `src/pages/api/logout.ts`, protección de rutas).
 
 **Paso 2: Creación del Panel de Administración (Dashboard)**
-
-*   **Propósito:** Servir como la página principal de la sección de administración, con enlaces a las funcionalidades de creación de contenido.
-*   **Archivo a Crear:**
-    *   `portafolio2.0/src/pages/admin/index.astro`:
-        *   Contendrá el chequeo de autenticación.
-        *   Mostrará enlaces a "Crear Nueva Entrada de Blog" y "Crear Nuevo Proyecto".
-        *   Tendrá un botón para "Cerrar Sesión".
+*   (Ya completado: `src/pages/admin/index.astro`).
+*   **Modificación:** Añadiremos enlaces a las nuevas páginas de listado de posts y proyectos.
 
 **Paso 3: Creación de Formularios para Nuevo Contenido**
-
-*   **Propósito:** Proporcionar interfaces amigables para que puedas introducir los datos de tus nuevas entradas de blog y proyectos.
+*   **Propósito:** Proporcionar interfaces para añadir nuevas entradas de blog y proyectos.
 *   **Archivos a Crear:**
-    *   `portafolio2.0/src/pages/admin/nuevo-post.astro`:
-        *   Formulario con campos para: `title`, `content` (textarea, posiblemente con soporte Markdown), `image_url`, `seo_description`.
-        *   El formulario enviará los datos a `src/pages/api/posts/create.ts`.
-    *   `portafolio2.0/src/pages/admin/nuevo-repo.astro`:
-        *   Formulario con campos para: `name`, `description`, `technologies`, `url`, `github_url`, `image_url`.
-        *   El formulario enviará los datos a `src/pages/api/repos/create.ts`.
-*   **Consideraciones:**
-    *   Ambos formularios tendrán un `<script>` en el cliente para manejar el envío del formulario (usando `fetch`) y mostrar mensajes de éxito/error.
+    *   `portafolio2.0/src/pages/admin/nuevo-post.astro`: Formulario para crear un nuevo post.
+    *   `portafolio2.0/src/pages/admin/nuevo-repo.astro`: Formulario para crear un nuevo proyecto.
+*   **Consideraciones:** Estos formularios enviarán datos a los API Endpoints de creación.
 
-**Paso 4: Implementación de API Endpoints (Serverless Functions) para Guardar Contenido**
-
-*   **Propósito:** Recibir los datos de los formularios, validarlos y persistirlos en la base de datos PostgreSQL.
+**Paso 4: Implementación de Vistas de Listado de Contenido para Administración**
+*   **Propósito:** Mostrar una lista de todo el contenido existente con opciones para editar o borrar cada elemento.
 *   **Archivos a Crear:**
-    *   `portafolio2.0/src/pages/api/posts/create.ts`:
-        *   Recibirá el `FormData` del formulario.
-        *   Realizará una validación básica de los datos (ej. campos obligatorios).
-        *   Insertará los datos en la tabla `blog_posts` de PostgreSQL.
-        *   **¡CRUCIAL!** Después de una inserción exitosa, activará el Vercel Deploy Hook (ver Paso 5).
-        *   Devolverá una respuesta JSON indicando éxito o error.
-    *   `portafolio2.0/src/pages/api/repos/create.ts`:
-        *   Similar a `create.ts` para posts, pero insertará en la tabla `repositories`.
-        *   También activará el Vercel Deploy Hook.
+    *   `portafolio2.0/src/pages/admin/posts/index.astro`:
+        *   Listará todas las entradas de `blog_posts`.
+        *   Cada entrada tendrá un botón "Editar" (que enlazará a `admin/posts/[id]/edit`) y un botón "Borrar".
+        *   Incluirá la lógica para obtener los datos de la base de datos.
+    *   `portafolio2.0/src/pages/admin/repos/index.astro`:
+        *   Similar a la anterior, pero para la tabla `repositories`.
+        *   Cada proyecto tendrá un botón "Editar" (que enlazará a `admin/repos/[id]/edit`) y un botón "Borrar".
 
-**Paso 5: Integración con Vercel Deploy Hook para Reconstrucción Automática**
+**Paso 5: Creación de Formularios de Edición de Contenido**
+*   **Propósito:** Permitir la modificación de entradas de blog y proyectos existentes.
+*   **Archivos a Crear:**
+    *   `portafolio2.0/src/pages/admin/posts/[id]/edit.astro`:
+        *   Formulario similar al de creación, pero pre-rellenado con los datos del post correspondiente.
+        *   El formulario enviará los datos a un API Endpoint de actualización.
+    *   `portafolio2.0/src/pages/admin/repos/[id]/edit.astro`:
+        *   Similar a la anterior, pero para proyectos.
 
-*   **Propósito:** Asegurar que cada vez que añadas o modifiques contenido, tu sitio estático se reconstruya y se despliegue automáticamente con los nuevos datos.
-*   **Configuración en Vercel (Manual):**
-    *   Necesitarás ir al panel de control de Vercel para tu proyecto.
-    *   En la sección "Settings" -> "Git" -> "Deploy Hooks", crearás un nuevo "Deploy Hook".
-    *   Le darás un nombre (ej. `rebuild-on-content-change`) y seleccionarás la rama `main`.
-    *   Vercel te proporcionará una URL única para este hook.
-    *   Esta URL la guardarás como una variable de entorno secreta en Vercel, por ejemplo, `VERCEL_DEPLOY_HOOK_URL`.
+**Paso 6: Implementación de API Endpoints (Serverless Functions) para CRUD**
+*   **Propósito:** Manejar las operaciones de base de datos para el contenido.
+*   **Archivos a Crear/Modificar:**
+    *   **Crear (POST):**
+        *   `portafolio2.0/src/pages/api/posts/create.ts`: Recibe datos y los inserta en `blog_posts`.
+        *   `portafolio2.0/src/pages/api/repos/create.ts`: Recibe datos y los inserta en `repositories`.
+    *   **Actualizar (PUT/PATCH):**
+        *   `portafolio2.0/src/pages/api/posts/[id]/update.ts`: Recibe datos y actualiza una entrada específica en `blog_posts`.
+        *   `portafolio2.0/src/pages/api/repos/[id]/update.ts`: Recibe datos y actualiza un proyecto específico en `repositories`.
+    *   **Borrar (DELETE):**
+        *   `portafolio2.0/src/pages/api/posts/[id]/delete.ts`: Recibe una solicitud para borrar una entrada específica de `blog_posts`.
+        *   `portafolio2.0/src/pages/api/repos/[id]/delete.ts`: Recibe una solicitud para borrar un proyecto específico de `repositories`.
+*   **Consideraciones:** Todos estos endpoints deberán verificar la autenticación del administrador.
+
+**Paso 7: Integración con Vercel Deploy Hook para Reconstrucción Automática**
+*   **Propósito:** Asegurar que cada vez que se cree, actualice o elimine contenido, tu sitio estático se reconstruya y se despliegue automáticamente con los nuevos datos.
+*   **Configuración en Vercel (Manual):** (Ya explicado en el plan original).
 *   **Activación desde API Endpoints (Código):**
-    *   En `src/pages/api/posts/create.ts` y `src/pages/api/repos/create.ts`, después de que la inserción en la base de datos sea exitosa, se realizará una solicitud `fetch` a la `VERCEL_DEPLOY_HOOK_URL`. Esto le dirá a Vercel que inicie un nuevo proceso de construcción.
+    *   En **todos** los API Endpoints de creación, actualización y eliminación (`create.ts`, `update.ts`, `delete.ts` para posts y repos), después de que la operación en la base de datos sea exitosa, se realizará una solicitud `fetch` a la `VERCEL_DEPLOY_HOOK_URL`.
 
 ---
 
-#### **Consideraciones de Seguridad:**
+#### **Consideraciones Adicionales:**
 
-*   **Variables de Entorno:** `ADMIN_USERNAME`, `ADMIN_PASSWORD` y `VERCEL_DEPLOY_HOOK_URL` se almacenarán como variables de entorno en Vercel, **nunca en el código fuente público**.
-*   **Autenticación Básica:** El sistema de autenticación propuesto es adecuado para un portafolio personal donde solo tú eres el administrador. Para aplicaciones con múltiples usuarios o requisitos de seguridad más estrictos, se necesitaría una solución de autenticación más robusta (ej. OAuth, JWTs, Firebase Authentication, etc.).
 *   **Validación de Entrada:** Es crucial validar todos los datos recibidos de los formularios en los API endpoints para prevenir inyecciones SQL u otros ataques.
+*   **Manejo de Errores:** Implementar un manejo de errores robusto en todos los API endpoints y en el frontend para proporcionar feedback claro al usuario.
+*   **Confirmación de Borrado:** Para las operaciones de borrado, se implementará una confirmación en el frontend para evitar eliminaciones accidentales.
 
-**Estado: Pendiente.**
+**Estado: En progreso.**
+
+---
+
+### **Problema Actual: Botones de Borrado No Funcionan**
+
+*   **Descripción:** Los botones "Borrar" en las páginas de gestión de posts (`/admin/posts`) y proyectos (`/admin/repos`) no desencadenan ninguna acción. No se observan mensajes en la consola del navegador ni solicitudes de red cuando se hace clic.
+*   **Diagnóstico:** El JavaScript del lado del cliente responsable de manejar el evento `click` no se está ejecutando en el navegador.
+*   **Pasos de Depuración Tomados:**
+    *   Se añadió la directiva `client:load` a los `<script>` tags en `src/pages/admin/posts/index.astro` y `src/pages/admin/repos/index.astro`.
+    *   Se eliminó el `document.addEventListener('DOMContentLoaded', ...)` y se colocó el código directamente dentro del `<script client:load>`.
+    *   Se añadió un `alert()` al principio del `<script client:load>` para verificar la ejecución del script. **Este `alert()` no aparece en el navegador.**
+    *   Se corrigió un `SyntaxError` (`expected expression, got ')'`) causado por un `});` extra en los scripts.
+*   **Hipótesis:** A pesar de `client:load`, el JavaScript dentro de estos componentes específicos de Astro no está siendo hidratado o ejecutado en el lado del cliente. Esto podría deberse a:
+    *   Un problema más fundamental con la configuración de Astro o con la forma en que los scripts se están cargando en tu entorno.
+    *   Un conflicto con otras partes del código o integraciones (ej. `ViewTransitions`).
+*   **Próximos Pasos para Depuración:**
+    *   **Verificar errores en la consola del navegador:** Asegurarse de que no haya errores de JavaScript en la consola (F12) *antes* de intentar interactuar con los botones.
+    *   **Simplificar el script al mínimo:** Reducir el contenido del `<script client:load>` a solo un `alert()` para confirmar si *cualquier* JavaScript puede ejecutarse en ese contexto. (Ya se hizo, y el `alert` no aparece, lo que es preocupante).
+    *   **Desactivar `ViewTransitions` temporalmente:** Eliminar `<ViewTransitions />` de `src/layouts/Layout.astro` para descartar cualquier interferencia con la carga de scripts.
+    *   **Mover el JavaScript a un archivo `.js` externo:** En lugar de scripts inline, crear un archivo `.js` separado, importarlo en el componente Astro y ver si eso cambia el comportamiento de carga.
 
 ---
 

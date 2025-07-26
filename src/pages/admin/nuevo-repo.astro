@@ -1,0 +1,125 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { isAuthenticated } from '../../lib/auth';
+
+export const prerender = false;
+
+// Proteger esta ruta
+if (!isAuthenticated(Astro.cookies)) {
+  return Astro.redirect('/admin/login');
+}
+---
+
+<Layout title="Crear Nuevo Proyecto">
+  <main class="admin-form-container">
+    <h1>Crear Nuevo Proyecto</h1>
+    <form id="new-repo-form">
+      <div>
+        <label for="title">Título del Proyecto:</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+      <div>
+        <label for="description">Descripción:</label>
+        <textarea id="description" name="description" rows="5" required></textarea>
+      </div>
+      <div>
+        <label for="url">URL del Proyecto:</label>
+        <input type="url" id="url" name="url" required>
+      </div>
+      <div>
+        <label for="image_url">URL de la Imagen (opcional):</label>
+        <input type="url" id="image_url" name="image_url">
+      </div>
+      <button type="submit">Guardar Proyecto</button>
+    </form>
+    <p id="form-message" class="message"></p>
+  </main>
+</Layout>
+
+<style>
+  .admin-form-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  .admin-form-container h1 {
+    color: #00bcd4;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .admin-form-container div {
+    margin-bottom: 1rem;
+  }
+  .admin-form-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  .admin-form-container input[type="text"],
+  .admin-form-container input[type="url"],
+  .admin-form-container textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #0d0d0d;
+    color: #fff;
+  }
+  .admin-form-container button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  .admin-form-container button:hover {
+    background-color: #218838;
+  }
+  .message {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  .message.success {
+    color: green;
+  }
+  .message.error {
+    color: red;
+  }
+</style>
+
+<script>
+  document.getElementById('new-repo-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const messageElement = document.getElementById('form-message');
+    messageElement.textContent = 'Guardando...';
+    messageElement.className = 'message';
+
+    const response = await fetch('/api/repos/create', {
+      method: 'POST',
+      body: JSON.stringify(Object.fromEntries(formData)),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      messageElement.textContent = result.message;
+      messageElement.classList.add('success');
+      form.reset();
+    } else {
+      messageElement.textContent = `Error: ${result.message}`;
+      messageElement.classList.add('error');
+    }
+  });
+</script>

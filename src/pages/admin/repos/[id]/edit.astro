@@ -1,0 +1,149 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { db } from '../../../../lib/db';
+import { isAuthenticated } from '../../../../lib/auth';
+
+export const prerender = false;
+
+// Proteger esta ruta
+if (!isAuthenticated(Astro.cookies)) {
+  return Astro.redirect('/admin/login');
+}
+
+const { id } = Astro.params;
+
+let project = null;
+let error = null;
+
+try {
+  const { rows } = await db.query('SELECT * FROM repositories WHERE id = $1;', [id]);
+  if (rows.length > 0) {
+    project = rows[0];
+  } else {
+    error = 'Proyecto no encontrado.';
+  }
+} catch (e) {
+  error = e.message;
+}
+---
+
+<Layout title={project ? `Editar Proyecto: ${project.title}` : 'Editar Proyecto'}>
+  <main class="admin-form-container">
+    <h1>{project ? `Editar Proyecto: ${project.title}` : 'Proyecto no encontrado'}</h1>
+    {error ? (
+      <p>{error}</p>
+    ) : project ? (
+      <form id="edit-repo-form">
+        <input type="hidden" id="project-id" name="id" value={project.id} />
+        <div>
+          <label for="title">Título del Proyecto:</label>
+          <input type="text" id="title" name="title" value={project.title} required>
+        </div>
+        <div>
+          <label for="description">Descripción:</label>
+          <textarea id="description" name="description" rows="5" required>{project.description}</textarea>
+        </div>
+        <div>
+          <label for="url">URL del Proyecto:</label>
+          <input type="url" id="url" name="url" value={project.url} required>
+        </div>
+        <div>
+          <label for="image_url">URL de la Imagen (opcional):</label>
+          <input type="url" id="image_url" name="image_url" value={project.image_url || ''}>
+        </div>
+        <button type="submit">Guardar Cambios</button>
+      </form>
+    ) : (
+      <p>Cargando...</p>
+    )}
+    <p id="form-message" class="message"></p>
+  </main>
+</Layout>
+
+<style>
+  .admin-form-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  .admin-form-container h1 {
+    color: #00bcd4;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .admin-form-container div {
+    margin-bottom: 1rem;
+  }
+  .admin-form-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  .admin-form-container input[type="text"],
+  .admin-form-container input[type="url"],
+  .admin-form-container textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #0d0d0d;
+    color: #fff;
+  }
+  .admin-form-container button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  .admin-form-container button:hover {
+    background-color: #0056b3;
+  }
+  .message {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  .message.success {
+    color: green;
+  }
+  .message.error {
+    color: red;
+  }
+</style>
+
+<script>
+  document.getElementById('edit-repo-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const projectId = formData.get('id');
+    const messageElement = document.getElementById('form-message');
+    messageElement.textContent = 'Guardando cambios...';
+    messageElement.className = 'message';
+
+    const response = await fetch(`/api/repos/${projectId}/update`, {
+      method: 'PUT',
+      body: JSON.stringify(Object.fromEntries(formData)),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      messageElement.textContent = result.message;
+      messageElement.classList.add('success');
+    } else {
+      messageElement.textContent = `Error: ${result.message}`;
+      messageElement.classList.add('error');
+    }
+  });
+</script>

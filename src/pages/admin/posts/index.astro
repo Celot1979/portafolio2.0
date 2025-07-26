@@ -1,0 +1,136 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/db';
+import { isAuthenticated } from '../../../lib/auth';
+
+export const prerender = false;
+
+// Proteger esta ruta
+if (!isAuthenticated(Astro.cookies)) {
+  return Astro.redirect('/admin/login');
+}
+
+let posts = [];
+let error = null;
+
+try {
+  const result = await db.query('SELECT id, title, created_at FROM blog_posts ORDER BY created_at DESC;');
+  posts = result.rows;
+} catch (e) {
+  error = e.message;
+}
+---
+
+<Layout title="Gestionar Entradas de Blog">
+  <main class="admin-list-container">
+    <h1>Gestionar Entradas de Blog</h1>
+    {error ? (
+      <p>Error al cargar las entradas del blog: {error}</p>
+    ) : (
+      <div class="list-items">
+        {
+          posts.length > 0 ? (
+            posts.map((post) => (
+              <div class="list-item">
+                <span>{post.title}</span>
+                <div class="actions">
+                  <a href={`/admin/posts/${post.id}/edit`} class="edit-button">Editar</a>
+                  <button class="delete-button" data-id={post.id}>Borrar</button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>No hay entradas de blog para gestionar.</p>
+          )
+        }
+      </div>
+    )}
+  </main>
+</Layout>
+
+<style>
+  .admin-list-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  .admin-list-container h1 {
+    color: #00bcd4;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0d0d0d;
+    padding: 1rem;
+    border-radius: 5px;
+    border: 1px solid #333;
+  }
+  .list-item span {
+    flex-grow: 1;
+    margin-right: 1rem;
+  }
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .edit-button,
+  .delete-button {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .edit-button {
+    background-color: #007bff;
+    color: white;
+  }
+  .edit-button:hover {
+    background-color: #0056b3;
+  }
+  .delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+  }
+  .delete-button:hover {
+    background-color: #c82333;
+  }
+</style>
+
+<script client:load>
+  alert("Script de posts cargado!"); // <--- LÍNEA AÑADIDA PARA DEPURACIÓN
+  const deleteButtons = document.querySelectorAll('.delete-button');
+  console.log("Número de botones de borrar encontrados (posts):", deleteButtons.length);
+
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', async (e) => {
+      console.log("Botón de borrar clickeado (posts)!");
+      const postId = e.target.dataset.id;
+      if (confirm(`¿Estás seguro de que quieres borrar la entrada con ID ${postId}?`)) {
+        const response = await fetch(`/api/posts/${postId}/delete`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          alert('Entrada borrada con éxito. El sitio se reconstruirá.');
+          window.location.reload();
+        } else {
+          const result = await response.json();
+          alert(`Error al borrar la entrada: ${result.message}`);
+        }
+      });
+    });
+  });
+</script>
