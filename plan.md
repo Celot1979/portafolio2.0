@@ -130,7 +130,9 @@ Con los datos fluyendo, construiremos las páginas que verán los visitantes.
         *   Crea el componente `src/components/FadeInOnScroll.astro`.
         *   Envuelve el contenido principal de `index.astro` con `FadeInOnScroll`.
         *   Envuelve cada `article` en `blog/index.astro` y `proyectos/index.astro` con `FadeInOnScroll` (con retraso escalonado).
+        *   **Nota:** Se desactivó temporalmente para depuración.
     *   **Animación de Fondo Sutil:** Implementa un gradiente animado en el `body` a través de `src/layouts/Layout.astro`.
+    *   **Efecto de Rastro de Ratón:** Se intentó implementar pero se revirtió debido a problemas de estabilidad.
 
 **Estado: En progreso.**
 
@@ -194,7 +196,7 @@ El último paso es poner el sitio online y automatizar las actualizaciones.
     ```
 
 5.  **Desplegar:**
-    *   Ve a la pestaña "Deployments" de tu proyecto en Vercel y haz clic en "Redeploy" para la última confirmación.
+    *   Go to the "Deployments" tab of your project in Vercel and click "Redeploy" for the latest commit.
 
 6.  **Prueba Final:**
     *   Visita la URL que te proporciona Vercel.

@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { db } from '../../lib/db';
-import FadeInOnScroll from '../../components/FadeInOnScroll.astro';
+// import FadeInOnScroll from '../../components/FadeInOnScroll.astro'; // Desactivado
 
 let projects = [];
 let error = null;
@@ -9,8 +9,10 @@ let error = null;
 try {
   const result = await db.query('SELECT * FROM repositories ORDER BY created_at DESC;');
   projects = result.rows;
+  console.log("Proyectos obtenidos:", projects);
 } catch (e) {
   error = e.message;
+  console.error("Error al obtener proyectos:", error);
 }
 ---
 
@@ -24,14 +26,14 @@ try {
         {
           projects.length > 0 ? (
             projects.map((project, index) => (
-              <FadeInOnScroll delay={index * 100}> {/* Retraso escalonado */}
+              // <FadeInOnScroll delay={index * 100}> {/* Desactivado */}
                 <article>
                   {project.image_url && <img src={project.image_url} alt={project.name} class="project-image" />}
                   <h2><a href={`/proyectos/${project.slug}`}>{project.name}</a></h2>
                   <p>{project.description}</p>
                   <p>Tecnologías: {project.technologies}</p>
                 </article>
-              </FadeInOnScroll>
+              // </FadeInOnScroll> // Desactivado
             ))
           ) : (
             <p>No hay proyectos disponibles.</p>

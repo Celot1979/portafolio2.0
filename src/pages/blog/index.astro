@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { db } from '../../lib/db';
-import FadeInOnScroll from '../../components/FadeInOnScroll.astro';
+// import FadeInOnScroll from '../../components/FadeInOnScroll.astro'; // Desactivado
 
 let posts = [];
 let error = null;
@@ -9,8 +9,10 @@ let error = null;
 try {
   const result = await db.query('SELECT * FROM blog_posts ORDER BY created_at DESC;');
   posts = result.rows;
+  console.log("Posts obtenidos:", posts);
 } catch (e) {
   error = e.message;
+  console.error("Error al obtener posts:", error);
 }
 ---
 
@@ -24,7 +26,7 @@ try {
         {
           posts.length > 0 ? (
             posts.map((post, index) => (
-              <FadeInOnScroll delay={index * 100}> {/* Retraso escalonado */}
+              // <FadeInOnScroll delay={index * 100}> {/* Desactivado */}
                 <article>
                   {post.image_url && <img src={post.image_url} alt={post.title} class="post-image" />}
                   <h2>{post.title}</h2>
@@ -32,7 +34,7 @@ try {
                   <p>{post.excerpt || post.content.substring(0, 150) + '...'}</p>
                   <a href={`/blog/${post.id}`} class="read-more-button">Leer más</a>
                 </article>
-              </FadeInOnScroll>
+              // </FadeInOnScroll> // Desactivado
             ))
           ) : (
             <p>No hay entradas de blog disponibles.</p>
