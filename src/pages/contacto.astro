@@ -1,0 +1,82 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Contacto - Mi Portafolio">
+  <main>
+    <h1>Contacto</h1>
+    <p>Puedes contactarme a través de los siguientes medios:</p>
+    
+    <div class="contact-buttons">
+      <a href="mailto:dgarciamartinez53@gmail.com" class="button">Enviar Email</a>
+      <a href="tg://resolve?domain=Celot1979" class="button">Enviar Telegram</a>
+    </div>
+
+    <p>O si lo prefieres, puedes usar el siguiente formulario:</p>
+    <form action="/api/contact" method="POST">
+      <div>
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div>
+        <label for="message">Mensaje:</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+      </div>
+      <button type="submit">Enviar Mensaje</button>
+    </form>
+  </main>
+</Layout>
+
+<style>
+  .contact-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  .button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff; /* Color de ejemplo */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  .button:hover {
+    background-color: #0056b3; /* Color de ejemplo al pasar el ratón */
+  }
+  /* Estilos básicos para el formulario */
+  form div {
+    margin-bottom: 15px;
+  }
+  form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  form input[type="text"],
+  form input[type="email"],
+  form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Para que el padding no aumente el ancho */
+  }
+  form button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #28a745; /* Color de ejemplo */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  form button[type="submit"]:hover {
+    background-color: #218838; /* Color de ejemplo al pasar el ratón */
+  }
+</style>

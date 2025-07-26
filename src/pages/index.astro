@@ -1,11 +1,46 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import FadeInOnScroll from '../components/FadeInOnScroll.astro';
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Inicio - Mi Portafolio">
+  <main class="homepage-content">
+    <FadeInOnScroll>
+      <h1>¡Bienvenido a mi Portafolio!</h1>
+      <p>Explora mis proyectos, lee mis artículos en el blog y conoce un poco más sobre mí.</p>
+      <p>Utiliza el menú de navegación para moverte por el sitio.</p>
+    </FadeInOnScroll>
+  </main>
 </Layout>
+
+<style>
+  .homepage-content {
+    text-align: center; /* Centra el texto */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra verticalmente el contenido en main */
+    min-height: calc(100vh - 100px); /* Ajusta la altura para que ocupe la mayor parte de la pantalla */
+  }
+
+  .homepage-content h1 {
+    font-size: 3.5em; /* Aumenta el tamaño del título */
+    margin-bottom: 0.5em;
+  }
+
+  .homepage-content p {
+    font-size: 1.5em; /* Aumenta el tamaño del párrafo */
+    line-height: 1.6;
+    max-width: 700px; /* Limita el ancho para mejor legibilidad */
+    margin: 0.5em auto; /* Centra los párrafos */
+  }
+
+  /* Ajustes para pantallas más pequeñas */
+  @media (max-width: 768px) {
+    .homepage-content h1 {
+      font-size: 2.5em;
+    }
+    .homepage-content p {
+      font-size: 1.2em;
+    }
+  }
+</style>

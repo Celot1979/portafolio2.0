@@ -1,0 +1,95 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/db';
+import { marked } from 'marked'; // Importar marked
+
+export async function getStaticPaths() {
+  const { rows: posts } = await db.query('SELECT id FROM blog_posts;');
+  return posts.map((post) => ({
+    params: { id: post.id.toString() },
+  }));
+}
+
+const { id } = Astro.params;
+
+let post = null;
+let error = null;
+
+try {
+  const { rows } = await db.query('SELECT * FROM blog_posts WHERE id = $1;', [id]);
+  if (rows.length > 0) {
+    post = rows[0];
+    // Convertir el contenido de Markdown a HTML
+    post.content = marked(post.content);
+    console.log("Processed Markdown content:", post.content); // <--- LÍNEA AÑADIDA
+  } else {
+    error = 'Entrada de blog no encontrada.';
+  }
+} catch (e) {
+  error = e.message;
+}
+---
+
+<Layout title={post ? post.title : 'Entrada no encontrada'}>
+  <main>
+    {error ? (
+      <p>{error}</p>
+    ) : post ? (
+      <article>
+        <h1>{post.title}</h1>
+        <p>Fecha: {new Date(post.created_at).toLocaleDateString()}</p>
+        {post.image_url && <img src={post.image_url} alt={post.title} class="post-detail-image" />}
+        <div class="blog-content" set:html={post.content} />
+      </article>
+    ) : (
+      <p>Cargando...</p>
+    )}
+  </main>
+</Layout>
+
+<style>
+  .post-detail-image {
+    width: 100%;
+    max-height: 400px; /* Altura máxima para la imagen de detalle */
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+  /* Estilos básicos para el contenido Markdown */
+  .blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4, .blog-content h5, .blog-content h6 {
+    color: #00bcd4; /* Color de acento para los títulos */
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  .blog-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .blog-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5rem auto;
+    border-radius: 8px;
+  }
+  .blog-content a {
+    color: #00bcd4;
+    text-decoration: underline;
+  }
+  .blog-content pre {
+    background-color: #2d2d2d;
+    padding: 1rem;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+  .blog-content code {
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    background-color: #2d2d2d;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+  }
+  .blog-content pre code {
+    background-color: transparent;
+    padding: 0;
+  }
+</style>
