@@ -13,7 +13,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <p>O si lo prefieres, puedes usar el siguiente formulario:</p>
-    <form action="/api/contact" method="POST">
+    <form id="contact-form">
       <div>
         <label for="name">Nombre:</label>
         <input type="text" id="name" name="name" required>
@@ -28,8 +28,11 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <button type="submit">Enviar Mensaje</button>
     </form>
+    <div id="response-message" style="margin-top: 15px;"></div>
   </main>
 </Layout>
+
+<script src="../assets/contact-form.js"></script>
 
 <style>
   .contact-buttons {
