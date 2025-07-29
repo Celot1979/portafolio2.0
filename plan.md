@@ -226,23 +226,20 @@ Esta fase se centrará en la creación de una sección de administración básic
 
 ---
 
-### **Problema Actual: Botones de Borrado No Funcionan**
+### **Problema Resuelto: Botones de Borrado No Funcionaban**
 
-*   **Descripción:** Los botones "Borrar" en las páginas de gestión de posts (`/admin/posts`) y proyectos (`/admin/repos`) no desencadenan ninguna acción. No se observan mensajes en la consola del navegador ni solicitudes de red cuando se hace clic.
-*   **Diagnóstico:** El JavaScript del lado del cliente responsable de manejar el evento `click` no se está ejecutando en el navegador.
-*   **Pasos de Depuración Tomados:**
-    *   Se añadió la directiva `client:load` a los `<script>` tags en `src/pages/admin/posts/index.astro` y `src/pages/admin/repos/index.astro`.
-    *   Se eliminó el `document.addEventListener('DOMContentLoaded', ...)` y se colocó el código directamente dentro del `<script client:load>`.
-    *   Se añadió un `alert()` al principio del `<script client:load>` para verificar la ejecución del script. **Este `alert()` no aparece en el navegador.**
-    *   Se corrigió un `SyntaxError` (`expected expression, got ')'`) causado por un `});` extra en los scripts.
-*   **Hipótesis:** A pesar de `client:load`, el JavaScript dentro de estos componentes específicos de Astro no está siendo hidratado o ejecutado en el lado del cliente. Esto podría deberse a:
-    *   Un problema más fundamental con la configuración de Astro o con la forma en que los scripts se están cargando en tu entorno.
-    *   Un conflicto con otras partes del código o integraciones (ej. `ViewTransitions`).
-*   **Próximos Pasos para Depuración:**
-    *   **Verificar errores en la consola del navegador:** Asegurarse de que no haya errores de JavaScript en la consola (F12) *antes* de intentar interactuar con los botones.
-    *   **Simplificar el script al mínimo:** Reducir el contenido del `<script client:load>` a solo un `alert()` para confirmar si *cualquier* JavaScript puede ejecutarse en ese contexto. (Ya se hizo, y el `alert` no aparece, lo que es preocupante).
-    *   **Desactivar `ViewTransitions` temporalmente:** Eliminar `<ViewTransitions />` de `src/layouts/Layout.astro` para descartar cualquier interferencia con la carga de scripts.
-    *   **Mover el JavaScript a un archivo `.js` externo:** En lugar de scripts inline, crear un archivo `.js` separado, importarlo en el componente Astro y ver si eso cambia el comportamiento de carga.
+*   **Descripción:** Los botones "Borrar" en las páginas de gestión (`/admin/posts` y `/admin/repos`) no funcionaban. El problema se debía a que el código JavaScript del lado del cliente no se estaba ejecutando en el navegador.
+*   **Diagnóstico:** Se identificó que los scripts `<script>` inline dentro de los archivos `.astro`, a pesar de usar la directiva `client:load`, no se estaban "hidratando" correctamente, posiblemente por conflictos con otras funcionalidades de Astro como `ViewTransitions`.
+*   **Solución Aplicada:**
+    1.  **Se desactivó `ViewTransitions` temporalmente** en `src/layouts/Layout.astro` para descartar interferencias, aunque el problema persistía.
+    2.  **Se movió el código JavaScript** de los scripts inline a archivos externos dedicados:
+        *   `src/assets/admin-posts.js` para la lógica de borrado de posts.
+        *   `src/assets/admin-repos.js` para la lógica de borrado de repositorios.
+    3.  **Se reemplazaron los scripts inline** en `src/pages/admin/posts/index.astro` y `src/pages/admin/repos/index.astro` por etiquetas `<script>` que enlazan a estos nuevos archivos externos.
+    4.  Se añadió un `try...catch` a las solicitudes `fetch` para un mejor manejo de errores de red.
+
+*   **Resultado:** La externalización de los scripts resolvió el problema de ejecución. Los botones de borrado ahora son funcionales en ambas secciones de la administración.
+*   **Estado:** **Solucionado.**
 
 ---
 
