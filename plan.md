@@ -243,6 +243,29 @@ Esta fase se centrará en la creación de una sección de administración básic
 
 ---
 
+### **Problema Resuelto: Formulario de Contacto**
+
+*   **Descripción:** El formulario de contacto en `src/pages/contacto.astro` no enviaba mensajes a ninguna parte.
+*   **Diagnóstico:** El formulario era estático y no tenía una lógica de backend para procesar los datos ni un script frontend para manejar el envío asíncrono.
+*   **Solución Aplicada:**
+    1.  **Instalación de `resend`:** Se instaló la librería `resend` para facilitar el envío de correos transaccionales.
+    2.  **Configuración de API Key:** Se instruyó al usuario para añadir la `RESEND_API_KEY` en el archivo `.env`.
+    3.  **Creación de API Endpoint:** Se creó `src/pages/api/send-email.ts` como un endpoint de API para recibir los datos del formulario y usar Resend para enviar el correo a `dgarciamartinez53@gmail.com`.
+    4.  **Configuración de `prerender=false`:** Se añadió `export const prerender = false;` a `src/pages/api/send-email.ts` para asegurar que el endpoint se ejecute en el servidor y no sea pre-renderizado estáticamente.
+    5.  **Creación de Script Frontend:** Se creó `src/assets/contact-form.js` para manejar la lógica del formulario en el cliente:
+        *   Prevenir el envío por defecto del formulario.
+        *   Recoger los datos del formulario.
+        *   Enviar los datos al endpoint `/api/send-email.ts` usando `fetch`.
+        *   Mostrar mensajes de éxito o error al usuario.
+    6.  **Modificación de `contacto.astro`:** Se actualizó `src/pages/contacto.astro` para:
+        *   Asignar un `id="contact-form"` al formulario.
+        *   Añadir un `div` con `id="response-message"` para mostrar el estado del envío.
+        *   Enlazar el nuevo script `src/assets/contact-form.js`.
+*   **Resultado:** El formulario de contacto ahora es completamente funcional y envía correos electrónicos a la dirección especificada.
+*   **Estado:** **Solucionado.**
+
+---
+
 ### **Fase 5: Despliegue en Vercel y Automatización**
 
 El último paso es poner el sitio online y automatizar las actualizaciones.
