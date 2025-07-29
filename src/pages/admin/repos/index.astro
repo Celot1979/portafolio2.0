@@ -109,28 +109,4 @@ try {
   }
 </style>
 
-<script client:load>
-  alert("Script de repos cargado!"); // <--- LÍNEA AÑADIDA PARA DEPURACIÓN
-  const deleteButtons = document.querySelectorAll('.delete-button');
-  console.log("Número de botones de borrar encontrados (repos):", deleteButtons.length);
-
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
-      console.log("Botón de borrar clickeado (repos)!");
-      const projectId = e.target.dataset.id;
-      if (confirm(`¿Estás seguro de que quieres borrar el proyecto con ID ${projectId}?`)) {
-        const response = await fetch(`/api/repos/${projectId}/delete`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          alert('Proyecto borrado con éxito. El sitio se reconstruirá.');
-          window.location.reload();
-        } else {
-          const result = await response.json();
-          alert(`Error al borrar el proyecto: ${result.message}`);
-        }
-      });
-    });
-  });
-</script>
+<script src="../../../assets/admin-repos.js"></script>
