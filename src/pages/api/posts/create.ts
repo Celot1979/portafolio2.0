@@ -20,8 +20,7 @@ export async function POST({ request, cookies }) {
       [title, content, image_url, seo_description]
     );
 
-    // TODO: Activar Vercel Deploy Hook aquí
-    // await fetch(process.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+        await fetch(import.meta.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
 
     return new Response(JSON.stringify({ message: 'Post creado con éxito', id: result.rows[0].id }), { status: 201 });
   } catch (error) {

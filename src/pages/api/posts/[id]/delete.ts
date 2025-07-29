@@ -25,8 +25,7 @@ export async function DELETE({ request, cookies, params }) {
     }
 
     console.log("Post deleted successfully for ID:", postId);
-    // TODO: Activar Vercel Deploy Hook aquí
-    // await fetch(process.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+        await fetch(import.meta.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
 
     return new Response(JSON.stringify({ message: 'Post borrado con éxito' }), { status: 200 });
   } catch (error) {

@@ -134,7 +134,7 @@ Con los datos fluyendo, construiremos las páginas que verán los visitantes.
     *   **Animación de Fondo Sutil:** Implementa un gradiente animado en el `body` a través de `src/layouts/Layout.astro`.
     *   **Efecto de Rastro de Ratón:** Se intentó implementar pero se revirtió debido a problemas de estabilidad.
 
-**Estado: En progreso.**
+**Estado: Completada.**
 
 ---
 
@@ -222,7 +222,7 @@ Esta fase se centrará en la creación de una sección de administración básic
 *   **Manejo de Errores:** Implementar un manejo de errores robusto en todos los API endpoints y en el frontend para proporcionar feedback claro al usuario.
 *   **Confirmación de Borrado:** Para las operaciones de borrado, se implementará una confirmación en el frontend para evitar eliminaciones accidentales.
 
-**Estado: En progreso.**
+**Estado: Completada.**
 
 ---
 
