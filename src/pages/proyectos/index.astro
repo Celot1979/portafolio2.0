@@ -19,7 +19,6 @@ try {
 <Layout title="Proyectos - Mi Portafolio">
   <main>
     <h1>Mis Proyectos</h1>
-    <pre>{JSON.stringify(projects, null, 2)}</pre> <!-- DEBUG -->
     {error ? (
       <p>Error al cargar los proyectos: {error}</p>
     ) : (
@@ -29,11 +28,10 @@ try {
             projects.map((project, index) => (
               // <FadeInOnScroll delay={index * 100}> {/* Desactivado */}
                 <article>
-                  {project.image_url && <img src={project.image_url} alt={project.name} class="project-image" />}
-                  <h2><a href={`/proyectos/${project.slug}`}>{project.name}</a></h2>
+                  {project.image_url && <img src={project.image_url} alt={project.title} class="project-image" />}
+                  <h2><a href={`/proyectos/${project.slug}`}>{project.title}</a></h2>
                   <p>{project.description}</p>
-                  {project.repo_url && <a href={project.repo_url} target="_blank" rel="noopener noreferrer" class="repo-link">Ver en GitHub</a>}
-                  <p>Tecnologías: {project.technologies}</p>
+                  {project.url && <a href={project.url} target="_blank" rel="noopener noreferrer" class="repo-link">Ver en GitHub</a>}
                 </article>
               // </FadeInOnScroll> // Desactivado
             ))
