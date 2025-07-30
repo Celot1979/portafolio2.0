@@ -7,7 +7,16 @@ let projects = [];
 let error = null;
 
 try {
-  const result = await db.query('SELECT * FROM repositories ORDER BY created_at DESC;');
+  const result = await db.query(`
+    SELECT 
+      title,
+      description,
+      url,
+      image_url,
+      LOWER(REPLACE(title, ' ', '-')) as slug
+    FROM repositories 
+    ORDER BY created_at DESC;
+  `);
   projects = result.rows;
   console.log("Proyectos obtenidos:", projects);
 } catch (e) {
