@@ -19,6 +19,7 @@ try {
 <Layout title="Proyectos - Mi Portafolio">
   <main>
     <h1>Mis Proyectos</h1>
+    <pre>{JSON.stringify(projects, null, 2)}</pre> <!-- DEBUG -->
     {error ? (
       <p>Error al cargar los proyectos: {error}</p>
     ) : (
