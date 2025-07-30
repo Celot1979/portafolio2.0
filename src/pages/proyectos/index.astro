@@ -64,7 +64,7 @@ try {
             {Object.entries(techCounts).map(([tech, count]) => (
               <li>
                 <span class="tech-name">{tech}</span>
-                <span class="tech-stars">{"★".repeat(count)}</span>
+                <span class="tech-count">{count} ★</span>
               </li>
             ))}
           </ul>
@@ -137,9 +137,10 @@ try {
     font-weight: bold;
   }
 
-  .tech-stars {
-    color: #ffc107; /* Color dorado para las estrellas */
-    font-size: 1.2rem;
+  .tech-count {
+    color: #ffc107; /* Color dorado para el contador y la estrella */
+    font-weight: bold;
+    font-size: 1.1rem;
   }
 
   .project-list-container {
