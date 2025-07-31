@@ -1,0 +1,36 @@
+---
+// Este componente ahora solo renderiza el textarea y los estilos globales.
+export interface Props {
+  content?: string;
+  name?: string;
+  id?: string;
+}
+const { content = '', name = 'content', id = 'content' } = Astro.props;
+---
+
+<textarea id={id} name={name}>{content}</textarea>
+
+<style is:global>
+  /* Estilos para que el editor se integre con el tema oscuro */
+  .EasyMDEContainer .CodeMirror {
+    background-color: #0d0d0d !important;
+    color: #fff !important;
+    border-color: #333 !important;
+  }
+  .editor-toolbar {
+    background-color: #1a1a1a !important;
+    border-top: 1px solid #333 !important;
+    border-left: 1px solid #333 !important;
+    border-right: 1px solid #333 !important;
+  }
+  .editor-toolbar button {
+    color: #fff !important;
+  }
+  .editor-toolbar button:hover, .editor-toolbar button.active {
+    background: #00bcd4 !important;
+    border-color: #00bcd4 !important;
+  }
+  .editor-preview, .editor-preview-side {
+    background-color: #1a1a1a !important;
+  }
+</style>

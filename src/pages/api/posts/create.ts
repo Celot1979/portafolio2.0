@@ -16,11 +16,14 @@ export async function POST({ request, cookies }) {
     }
 
     const result = await db.query(
-      'INSERT INTO blog_posts (title, content, image_url, seo_description) VALUES ($1, $2, $3, $4) RETURNING id;',
+      'INSERT INTO blog_posts (title, content, image_url, seo_description, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id;',
       [title, content, image_url, seo_description]
     );
 
-        await fetch(import.meta.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+        // Si la URL del deploy hook existe (en producción), llamarla
+    if (import.meta.env.VERCEL_DEPLOY_HOOK_URL) {
+      await fetch(import.meta.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+    }
 
     return new Response(JSON.stringify({ message: 'Post creado con éxito', id: result.rows[0].id }), { status: 201 });
   } catch (error) {

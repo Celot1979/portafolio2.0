@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { db } from '../../lib/db';
-// import FadeInOnScroll from '../../components/FadeInOnScroll.astro'; // Desactivado
+import { marked } from 'marked'; // Importar marked
 
 let posts = [];
 let error = null;
@@ -14,6 +14,19 @@ try {
   error = e.message;
   console.error("Error al obtener posts:", error);
 }
+
+// Función para crear un extracto sin cortar HTML
+function createExcerpt(htmlContent, maxLength = 150) {
+  // Primero, eliminamos las etiquetas HTML para medir la longitud del texto real
+  const textOnly = htmlContent.replace(/<[^>]+>/g, '');
+  if (textOnly.length <= maxLength) {
+    return htmlContent; // Si es corto, devolvemos el HTML completo
+  }
+
+  // Si es largo, truncamos el texto y añadimos "..."
+  const truncatedText = textOnly.substring(0, maxLength);
+  return `<p>${truncatedText}...</p>`; // Devolvemos solo el texto truncado como un párrafo
+}
 ---
 
 <Layout title="Blog - Mi Portafolio">
@@ -25,17 +38,22 @@ try {
       <div class="blog-list">
         {
           posts.length > 0 ? (
-            posts.map((post, index) => (
-              // <FadeInOnScroll delay={index * 100}> {/* Desactivado */}
+            posts.map((post) => {
+              // Primero, procesamos el Markdown a HTML
+              const fullHtmlContent = marked(post.content || '');
+              // Luego, creamos un extracto a partir de ese HTML
+              const excerptHtml = createExcerpt(fullHtmlContent);
+
+              return (
                 <article>
                   {post.image_url && <img src={post.image_url} alt={post.title} class="post-image" />}
                   <h2>{post.title}</h2>
-                  <p>Fecha: {new Date(post.created_at).toLocaleDateString()}</p>
-                  <p>{post.excerpt || post.content.substring(0, 150) + '...'}</p>
+                  <p>Fecha: {post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Fecha no disponible'}</p>
+                  <div class="post-excerpt" set:html={excerptHtml} />
                   <a href={`/blog/${post.id}`} class="read-more-button">Leer más</a>
                 </article>
-              // </FadeInOnScroll> // Desactivado
-            ))
+              );
+            })
           ) : (
             <p>No hay entradas de blog disponibles.</p>
           )
@@ -60,6 +78,7 @@ try {
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* Para empujar el botón al final */
+    overflow-wrap: break-word; /* Para forzar el corte de palabras largas */
   }
   .blog-list article:hover {
     transform: translateY(-5px);

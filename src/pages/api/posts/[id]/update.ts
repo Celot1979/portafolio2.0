@@ -26,7 +26,10 @@ export async function PUT({ request, cookies, params }) {
       return new Response(JSON.stringify({ message: 'Post no encontrado' }), { status: 404 });
     }
 
-        await fetch(import.meta.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+        // Si la URL del deploy hook existe (en producción), llamarla
+    if (import.meta.env.VERCEL_DEPLOY_HOOK_URL) {
+      await fetch(import.meta.env.VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+    }
 
     return new Response(JSON.stringify({ message: 'Post actualizado con éxito' }), { status: 200 });
   } catch (error) {
